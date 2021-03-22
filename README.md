@@ -5,9 +5,10 @@ the fuse folder is a copy of 'bazil.org/fuse'(https://github.com/bazil/fuse), be
 
 # features
 
-1. support file's read/write
-2. support directory's build
+1. support file's read/write/remove/stat
+2. support directory's build/remove
 3. support file/directory lookup
+4. support rename
 
 
 

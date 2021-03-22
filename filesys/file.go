@@ -2,6 +2,7 @@ package filesys
 
 import (
 	"log"
+	"time"
 
 	"memfs/fuse"
 	"memfs/fuse/fs"
@@ -10,16 +11,25 @@ import (
 	"golang.org/x/net/context"
 )
 
+type TIME struct {
+	Atime time.Time
+	Ctime time.Time
+	Mtime time.Time
+}
+
 type File struct {
 	Node
+	TIME
 	data []byte
 }
 
 func NewFile(name string, mode uint32) *File {
 	newId := NewInode()
+	t := time.Now()
 
 	return &File{
 		Node: Node{Name: name, Inode: newId, Size: 0},
+		TIME: TIME{Atime: t, Ctime: t, Mtime: t},
 		data: make([]byte, 1024),
 	}
 }
@@ -30,6 +40,8 @@ func (f *File) Attr(ctx context.Context, attr *fuse.Attr) error {
 	attr.Inode = f.Inode
 	attr.Mode = 0755
 	attr.Size = f.Size
+	attr.Mtime = f.Mtime
+	attr.Ctime = f.Ctime
 	return nil
 }
 
@@ -55,6 +67,10 @@ func (f *File) Write(ctx context.Context, req *fuse.WriteRequest, resp *fuse.Wri
 	}
 	copy(f.data, req.Data)
 	f.data = f.data[:f.Size]
+
+	t := time.Now()
+	f.Mtime = t
+	f.Ctime = t
 
 	log.Printf("Write() file[%s] data:%s", f.Name, string(f.data))
 	return nil
